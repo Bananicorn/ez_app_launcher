@@ -1,5 +1,7 @@
 #!/usr/bin/env luajit
-package.path = package.path..";../?.lua"
+scriptPath = arg[0]
+dir = scriptPath:match("^.*/")
+package.path = package.path .. ";./" .. dir .. "?.lua;"
 
 local ffi = require("ffi")
 local bit = require("bit")
@@ -97,14 +99,14 @@ local function init_x()
 	local class = "pop-up"
 	local c_str_class = ffi.new("char[?]", #class)
 	ffi.copy(c_str_class, class)
-	
+
 	local name = ""
 	local c_str_name = ffi.new("char[?]", #name)
 	ffi.copy(c_str_name, name)
-	
+
 	wm_class_hint.res_class = c_str_class
 	wm_class_hint.res_name = c_str_name
-	
+
 	X11.XSetClassHint(dis, win, wm_class_hint)
 	X11.XSetStandardProperties(dis, win, "simple_app_launcher", "", None, nil, 0, nil)
 	X11.XSelectInput(dis, win, bor(ExposureMask,ButtonPressMask,KeyPressMask))
@@ -125,15 +127,15 @@ end
 
 local function redraw()
 	X11.XClearWindow(dis, win);
-	
+
 	local shownleftright = 2
 	local center = width / 2
-	
+
 	local x = (center - box_size / 2) - (box_size + padding) * shownleftright
 	local y = padding
 	local index_start = math.max(1, sel_app - shownleftright)
 	local index_stop = math.min(#apps, sel_app + shownleftright, #apps) 
-	
+
 	for i = index_start, index_stop do
 		if i < shownleftright then
 			x = center - box_size / 2 - math.max(0 , sel_app - i) * (box_size + padding)
@@ -165,9 +167,9 @@ local function main ()
 			local right = 114
 			local up = 111
 			local down = 116
-			
+
 			local key_code = event.xkey.keycode
-			
+
 			if key_code == left then
 				prev_application()
 			elseif key_code == right then
